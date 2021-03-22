@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>SxS Test Web App</title>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this sample</noscript>
+    <script async src="https://cdn.refinitiv.com/public/libs/sxs-web/sxs-web-loader.js"></script>
+    <script>
+        function sendContext(ric){
+            //context, channelID
+            //sxsWeb.setContext({_context: {entities: [{RIC: ric}]}},1);
+            sxsWeb.setContext(sxsWeb.Context.ric(ric),1);
+        };
+      
+        function contextReceived(contextData){
+            contextText = JSON.stringify(contextData._context, undefined, 2);
+            document.getElementById("outputArea").value = contextText;
+        }
+      
+        window.SxsWeb = window.SxsWeb || [];
+        window.sxsWeb = window.sxsWeb || function () {
+            SxsWeb.push(arguments);
+        };
+        
+        function registerOnContextChange(){
+            //register callback function
+            sxsWeb.onContextChange(contextReceived);
+        };
+
+        // Uncomment next line if you are using private network
+        //sxsWeb ("config", "use-network", "private");
+        sxsWeb('config','context','both');//none, both, send, receive
+        sxsWeb("start", new Date());
+        sxsWeb("onLoad", (status) => {
+            if (status === 'ok') {
+                console.log("Sxs Web is loaded");
+                //enable test buttons
+                document.getElementById("ibmContextButton").removeAttribute("disabled");
+                document.getElementById("ibmContextButton").value = "send IBM.N context to Workspace Web";
+                document.getElementById("pttContextButton").removeAttribute("disabled");
+                document.getElementById("pttContextButton").value = "send PTT.BK context to Workspace Web";
+                document.getElementById("registerOnContextChange").removeAttribute("disabled");
+            }
+            else {
+                console.log("Some issue detected", status);
+            }
+        });
+   </script>
+   Sending Context:<br/><br/>
+   <input type='button' id='ibmContextButton' disabled value='Not ready'
+   onclick='sendContext("IBM.N")'>
+   <br/><br/>
+   <input type='button' id='pttContextButton' disabled value='Not ready'
+   onclick='sendContext("PTT.BK")'>
+   <br/><br/><br/><br/>
+   Receiving Context:<br/><br/>
+   <input type='button' id='registerOnContextChange' disabled
+   value='Register On Context Change Event' onclick='registerOnContextChange()'>
+   <br/><br/>
+   <textarea rows="10" cols="50" id="outputArea"></textarea>
+</body>
+</html>
